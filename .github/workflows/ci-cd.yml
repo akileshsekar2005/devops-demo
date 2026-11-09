@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,7 +13,7 @@ permissions:
 
 env:
   AWS_REGION: ap-south-1
-  EKS_CLUSTER: devops-demo-cluster
+  EKS_CLUSTER: cicd-demo-eks
   DOCKER_IMAGE: ghcr.io/akileshsekar2005/devops-demo
 
 jobs:
@@ -21,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -71,10 +72,15 @@ jobs:
             --name "$EKS_CLUSTER" \
             --region "$AWS_REGION"
 
+      
       - name: Deploy to EKS
         run: |
           kubectl apply -f k8s/
-          kubectl set image deployment/devops-demo \
-            devops-demo=${DOCKER_IMAGE}:${GITHUB_SHA}
 
-          kubectl rollout status deployment/devops-demo --timeout=180s
+          kubectl set image deployment/devops-demo \
+            devops-demo=${DOCKER_IMAGE}:${GITHUB_SHA} \
+            -n devops-demo
+
+          kubectl rollout status deployment/devops-demo \
+            -n devops-demo \
+            --timeout=180s
