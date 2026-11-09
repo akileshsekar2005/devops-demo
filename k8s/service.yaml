@@ -4,7 +4,7 @@ metadata:
   name: devops-demo-service
   namespace: devops-demo
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: devops-demo
   ports:
